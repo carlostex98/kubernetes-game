@@ -1,0 +1,13 @@
+version: '3.1'
+
+services:
+
+  database:
+    image: mongo
+    container_name: 'mongo-sopes-x'
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: root
+      MONGO_INITDB_ROOT_PASSWORD: example
+      MONGO_INITDB_DTABASE: sopesx
+    ports:
+      - '27017-27019:27017-27019'
