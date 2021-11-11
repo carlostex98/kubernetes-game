@@ -9,8 +9,8 @@ import (
 
 	//"log"
 
-	"golang.org/x/net/context"
 	amqp "github.com/streadway/amqp"
+	"golang.org/x/net/context"
 )
 
 type Server struct {
@@ -48,7 +48,7 @@ func randInt(min int, max int) int {
 	return min + rand.Intn(max-min)
 }
 
-func winnerRPC(m string) (res int, err error) {
+func winnerRPC(m string) (res string, err error) {
 	conn, err := amqp.Dial("amqp://guest:guest@localhost:5672/")
 	failOnError(err, "Failed to connect to RabbitMQ")
 	defer conn.Close()
@@ -95,8 +95,9 @@ func winnerRPC(m string) (res int, err error) {
 
 	for d := range msgs {
 		if corrId == d.CorrelationId {
-			res, err = strconv.Atoi(string(d.Body))
-			failOnError(err, "Failed to convert body to integer")
+			//res, err = strconv.Atoi(string(d.Body))
+			res = string(d.Body)
+			//failOnError(err, "Failed to convert body to integer")
 			break
 		}
 	}

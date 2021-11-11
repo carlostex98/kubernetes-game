@@ -1,9 +1,15 @@
 package main
 
 import (
+	"context"
 	"fmt"
 	amqp "github.com/streadway/amqp"
+	"go.mongodb.org/mongo-driver/mongo"
+	"go.mongodb.org/mongo-driver/mongo/options"
 	"log"
+	"strconv"
+	"strings"
+	"time"
 )
 
 func failOnError(err error, msg string) {
@@ -12,17 +18,24 @@ func failOnError(err error, msg string) {
 	}
 }
 
-func fib(n int) int {
-	if n == 0 {
-		return 0
-	} else if n == 1 {
-		return 1
-	} else {
-		return fib(n-1) + fib(n-2)
-	}
+const (
+	URI = "mongodb://root:example@localhost:27017/"
+)
+
+type Data struct {
+	NumberReq int    `bson:"number_req" json:"number_req"`
+	Game     string `bson:"game" json:"game"`
+	NameGame string `bson:"name_game" json:"name_game"`
+	Winner  string `bson:"winner" json:"winner"`
+	Players int    `bson:"players" json:"players"`
+	Worker  string `bson:"worker" json:"worker"`
 }
 
 func main() {
+	//mongo connect
+	client, _ := mongo.Connect(context.TODO(), options.Client().ApplyURI(URI))
+
+	//rabbit connect
 	conn, err := amqp.Dial("amqp://guest:guest@localhost:5672/")
 	failOnError(err, "Failed to connect to RabbitMQ")
 	defer conn.Close()
@@ -67,9 +80,12 @@ func main() {
 			//n, err := strconv.Atoi(string(d.Body))
 			fmt.Println(string(d.Body))
 			//failOnError(err, "Failed to convert body to integer")
+			al := string(d.Body)
+			sx := strings.Split(al, "|")//valores spliteados
+			xx := convertToMongo(sx[0], sx[1], sx[2], sx[3], sx[4])
+			response := newDataMongo(xx, *client)
 
-			//log.Printf(" [.] fib(%d)", n)
-			response := "1"
+			//response := "1"
 
 			err = ch.Publish(
 				"",        // exchange
@@ -79,7 +95,7 @@ func main() {
 				amqp.Publishing{
 					ContentType:   "text/plain",
 					CorrelationId: d.CorrelationId,
-					Body:          []byte(response),
+					Body:          []byte(strconv.FormatBool(response)),
 				})
 			failOnError(err, "Failed to publish a message")
 
@@ -89,4 +105,37 @@ func main() {
 
 	log.Printf(" [*] Awaiting RPC requests")
 	<-forever
+}
+
+
+func convertToMongo(gameName string, players string, game string, numReq string, winner string) Data{
+	intVar, _ := strconv.Atoi(players)
+	x, _ := strconv.Atoi(numReq)
+	c := Data{
+		NumberReq: x,
+		Game:      game,
+		NameGame:  gameName,
+		Players:   intVar,
+		Worker:    "RabbitMQ",
+		Winner:    winner,
+	}
+
+	return c
+}
+
+func newDataMongo(data Data, c mongo.Client) bool {
+
+	col := c.Database("Proyecto2Sopes").Collection("Logs")
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	//dt, _:= toDoc(data)
+	_, insertErr := col.InsertOne(ctx, data)
+	//fmt.Println(xx)
+	if insertErr != nil {
+		fmt.Println("InsertONE Error:", insertErr)
+		defer cancel()
+		return false
+	} else {
+		defer cancel()
+		return true
+	}
 }
