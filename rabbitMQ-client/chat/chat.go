@@ -107,9 +107,6 @@ func winnerRPC(m string) (res string, err error) {
 
 
 
-
-
-
 func setWiner(name string, players string, game string, corr string) string {
 	//count++
 	//para el juego
