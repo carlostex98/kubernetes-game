@@ -25,7 +25,7 @@ type Data struct {
 }
 
 const (
-	URI = "mongodb://root:example@34.135.37.109:27017/"
+	URI = "mongodb://root:example@localhost:27017/"
 )
 var count = 0
 
