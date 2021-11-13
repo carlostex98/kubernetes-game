@@ -65,6 +65,6 @@ func main()  {
 		c.JSON(http.StatusOK, gin.H{"data": response.Body})
 	})
 
-	r.Run()
+	r.Run(":3000")
 }
 
