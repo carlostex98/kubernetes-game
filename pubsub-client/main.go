@@ -1,12 +1,13 @@
 package main
 
 import (
-	"cloud.google.com/go/pubsub"
-	"google.golang.org/grpc"
 	"log"
 	"net"
 	"pubsub-client/chat"
+
+	"cloud.google.com/go/pubsub"
 	"golang.org/x/net/context"
+	"google.golang.org/grpc"
 )
 
 var (
@@ -37,8 +38,7 @@ func main() {
 		}
 	}
 
-
-	lis, err := net.Listen("tcp", ":9000")
+	lis, err := net.Listen("tcp", ":9003")
 	if err != nil {
 		log.Fatalf("Failed to listen on port 9000: %v", err)
 	}

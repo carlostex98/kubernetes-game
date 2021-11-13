@@ -1,14 +1,15 @@
-
 package main
 
 import (
-	"google.golang.org/grpc"
 	"grpc-client/chat"
 	"strconv"
 
+	"google.golang.org/grpc"
+
+	"log"
+
 	"github.com/gin-gonic/gin"
 	"golang.org/x/net/context"
-	"log"
 
 	//"fmt"
 	"net/http"
@@ -17,11 +18,11 @@ import (
 
 type Data struct {
 	NumberReq int    `bson:"number_req" json:"number_req"`
-	Game     string `bson:"game" json:"game"`
-	NameGame string `bson:"name_game" json:"name_game"`
-	Winner  string `bson:"winner" json:"winner"`
-	Players int    `bson:"players" json:"players"`
-	Worker  string `bson:"worker" json:"worker"`
+	Game      string `bson:"game" json:"game"`
+	NameGame  string `bson:"name_game" json:"name_game"`
+	Winner    string `bson:"winner" json:"winner"`
+	Players   int    `bson:"players" json:"players"`
+	Worker    string `bson:"worker" json:"worker"`
 }
 
 /*const (
@@ -31,10 +32,10 @@ var count = 0
 
 //var client mongo.Client
 
-func main()  {
+func main() {
 	//fmt.Println("go go power ranger")
 	var conn *grpc.ClientConn
-	conn, err := grpc.Dial(":9000", grpc.WithInsecure())
+	conn, err := grpc.Dial(":9003", grpc.WithInsecure())
 	if err != nil {
 		log.Fatalf("could not connect: %s", err)
 	}
@@ -43,7 +44,7 @@ func main()  {
 	r := gin.Default()
 
 	r.GET("/", func(c *gin.Context) {
-		c.JSON(http.StatusOK, gin.H{"data": 2+2})
+		c.JSON(http.StatusOK, gin.H{"data": 2 + 2})
 	})
 	mx := chat.NewChatServiceClient(conn)
 
@@ -65,6 +66,5 @@ func main()  {
 		c.JSON(http.StatusOK, gin.H{"data": response.Body})
 	})
 
-	r.Run(":3000")
+	r.Run(":3003")
 }
-
