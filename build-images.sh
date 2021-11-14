@@ -23,7 +23,7 @@ sudo docker build -t  carlostex/kafka-client .
 sudo docker push carlostex/kafka-client
 cd ..
 
-cd rabbitMQ-client
+cd rabbitmq-client
 sudo docker build -t  carlostex/rabbitmq-client .
 sudo docker push carlostex/rabbitmq-client
 cd ..
