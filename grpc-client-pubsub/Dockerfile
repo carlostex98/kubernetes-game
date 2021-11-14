@@ -8,8 +8,7 @@ RUN go mod download
 
 COPY . .
 
-RUN go build -o /grpc-client
+RUN go build -o /grpc-client-pubsub
 
-EXPOSE 8080
 
-CMD [ "/grpc-client" ]
+CMD [ "/grpc-client-pubsub" ]

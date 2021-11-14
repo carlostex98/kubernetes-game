@@ -8,7 +8,7 @@ RUN go mod download
 
 COPY . .
 
-RUN go build -o /grpc-client-rabbit
+RUN go build -o /rabbit-client
 
 
-CMD [ "/grpc-client-rabbit" ]
+CMD [ "/rabbit-client" ]
