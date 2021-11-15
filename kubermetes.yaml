@@ -4,6 +4,333 @@ metadata:
   name: squidgame
 spec : {}
 status: {}
+--- #primer cliente
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: grpc-client-rabbit
+  name: grpc-client-rabbit
+  namespace: squidgame
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: grpc-client-rabbit
+  strategy: {}
+  template:
+    metadata:
+      labels:
+        app: grpc-client-rabbit
+      annotations:
+        linkerd.io/inject: enabled
+    spec:
+      containers:
+      - image: carlostex/grpc-client-rabbit
+        name: grpc-client-rabbit
+        resources: {}
+status: {}
+--- #segundo cliente
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: grpc-client-pubsub
+  name: grpc-client-pubsub
+  namespace: squidgame
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: grpc-client-pubsub
+  strategy: {}
+  template:
+    metadata:
+      labels:
+        app: grpc-client-pubsub
+      annotations:
+        linkerd.io/inject: enabled
+    spec:
+      containers:
+      - image: carlostex/grpc-client-pubsub
+        name: grpc-client-pubsub
+        resources: {}
+status: {}
+--- #tercer cliente (1)
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: grpc-client-kafka
+  name: grpc-client-kafka
+  namespace: squidgame
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: grpc-client-kafka
+  strategy: {}
+  template:
+    metadata:
+      labels:
+        app: grpc-client-kafka
+      annotations:
+        linkerd.io/inject: enabled
+    spec:
+      containers:
+      - image: carlostex/grpc-client-kafka
+        name: grpc-client-kafka
+        resources: {}
+status: {}
+--- #primer cliente intermedio
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: rabbitmq-client
+  name: rabbitmq-client
+  namespace: squidgame
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: rabbitmq-client
+  strategy: {}
+  template:
+    metadata:
+      labels:
+        app: rabbitmq-client
+      annotations:
+        linkerd.io/inject: enabled
+    spec:
+      containers:
+      - image: carlostex/rabbitmq-client
+        name: rabbitmq-client
+        resources: {}
+status: {}
+--- #segundo cliente intermedio
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: pubsub-client
+  name: pubsub-client
+  namespace: squidgame
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: pubsub-client
+  strategy: {}
+  template:
+    metadata:
+      labels:
+        app: pubsub-client
+      annotations:
+        linkerd.io/inject: enabled
+    spec:
+      containers:
+      - image: carlostex/pubsub-client
+        name: pubsub-client
+        resources: {}
+status: {}
+--- #tercer cliente intermedio
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: kafka-client
+  name: kafka-client
+  namespace: squidgame
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: kafka-client
+  strategy: {}
+  template:
+    metadata:
+      labels:
+        app: kafka-client
+      annotations:
+        linkerd.io/inject: enabled
+    spec:
+      containers:
+      - image: carlostex/kafka-client
+        name: kafka-client
+        resources: {}
+status: {}
+--- #servicios
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    app: grpc-client-rabbit
+  name: grpc-client-rabbit
+  namespace: squidgame
+spec:
+  ports:
+  - port: 3000
+    name: grpc11
+    protocol: TCP
+    targetPort: 3001
+  - port: 9001
+    name: grpc12
+    protocol: TCP
+    targetPort: 9001
+  selector:
+    app: grpc-client-rabbit
+  type: ClusterIP
+status:
+  loadBalancer: {}
 ---
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    app: grpc-client-pubsub
+  name: grpc-client-pubsub
+  namespace: squidgame
+spec:
+  ports:
+  - port: 3000
+    name: grpc21
+    protocol: TCP
+    targetPort: 3002
+  - port: 9002
+    name: grpc22
+    protocol: TCP
+    targetPort: 9002
+  selector:
+    app: grpc-client-pubsub
+  type: ClusterIP
+status:
+  loadBalancer: {}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    app: grpc-client-kafka
+  name: grpc-client-kafka
+  namespace: squidgame
+spec:
+  ports:
+  - port: 3000
+    name: grpc31
+    protocol: TCP
+    targetPort: 3003
+  - port: 9003
+    name: grpc32
+    protocol: TCP
+    targetPort: 9003
+  selector:
+    app: grpc-client-kafka
+  type: ClusterIP
+status:
+  loadBalancer: {}
+--- #servicios intermedios
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    app: rabbitmq-client
+  name: rabbitmq-client
+  namespace: squidgame
+spec:
+  ports:
+  - port: 9001
+    name: rpc12i
+    protocol: TCP
+    targetPort: 9001
+  selector:
+    app: rabbitmq-client
+  type: ClusterIP
+status:
+  loadBalancer: {}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    app: grpc-client-pubsub
+  name: grpc-client-pubsub
+  namespace: squidgame
+spec:
+  ports:
+  - port: 3000
+    name: grpc21
+    protocol: TCP
+    targetPort: 3002
+  - port: 9002
+    name: grpc22
+    protocol: TCP
+    targetPort: 9002
+  selector:
+    app: grpc-client-pubsub
+  type: ClusterIP
+status:
+  loadBalancer: {}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    app: grpc-client-kafka
+  name: grpc-client-kafka
+  namespace: squidgame
+spec:
+  ports:
+  - port: 3000
+    name: grpc31
+    protocol: TCP
+    targetPort: 3003
+  - port: 9003
+    name: grpc32
+    protocol: TCP
+    targetPort: 9003
+  selector:
+    app: grpc-client-kafka
+  type: ClusterIP
+status:
+  loadBalancer: {}
+--- #networking
+apiVersion: networking.k8s.io/v1 
+kind: Ingress 
+metadata: 
+  name: minimal-ingress 
+  annotations: 
+    kubernetes.io/ingress.class: nginx 
+    nginx.ingress.kubernetes.io/rewrite-target: / 
+    nginx.ingress.kubernetes.io/service-upstream: "true"
+  namespace: squidgame
+spec: 
+  rules: 
+  - host: 34.70.68.48.nip.io
+    http: 
+      paths: 
+      - path: /
+        pathType: Prefix 
+        backend: 
+           service: 
+            name: grpc-client-rabbit
+            port: 
+              number: 3000
+---
+apiVersion: split.smi-spec.io/v1alpha1
+kind: TrafficSplit
+metadata:
+  name: splitter
+  namespace: squidgame
+spec:
+  service: minimal-ingress 
+  backends:
+  - service: grpc-client-rabbit
+    weight: 33
+  - service: grpc-client-pubsub
+    weight: 33
+  - service: grpc-client-kafka
+    weight: 34
 
+      
 
