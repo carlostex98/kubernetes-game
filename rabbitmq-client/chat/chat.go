@@ -49,7 +49,7 @@ func randInt(min int, max int) int {
 }
 
 func winnerRPC(m string) (res string, err error) {
-	conn, err := amqp.Dial("amqp://guest:guest@localhost:5672/")
+	conn, err := amqp.Dial("amqp://guest:guest@34.66.118.26:5672/")
 	failOnError(err, "Failed to connect to RabbitMQ")
 	defer conn.Close()
 

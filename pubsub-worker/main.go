@@ -17,7 +17,7 @@ import (
 )
 
 const (
-	URI = "mongodb://root:example@localhost:27017/"
+	URI = "mongodb://root:example@34.66.118.26:27017/"
 )
 
 type Data struct {

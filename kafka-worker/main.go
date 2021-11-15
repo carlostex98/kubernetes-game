@@ -24,7 +24,7 @@ type Data struct {
 }
 
 const (
-	URI = "mongodb://root:example@localhost:27017/"
+	URI = "mongodb://root:example@34.66.118.26:27017/"
 )
 
 func main() {
