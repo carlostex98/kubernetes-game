@@ -32,7 +32,7 @@ func main() {
 	client, _ := mongo.Connect(context.TODO(), options.Client().ApplyURI(URI))
 
 	topic := "kafka-sopes"
-	worker, err := connectConsumer([]string{"localhost:29092"})
+	worker, err := connectConsumer([]string{"34.66.118.26:29092"})
 	if err != nil {
 		panic(err)
 	}
