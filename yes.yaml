@@ -1,0 +1,106 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: squidgame
+spec : {}
+status: {}
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: kafka
+  name: kafka
+  namespace: squidgame
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: kafka
+  strategy: {}
+  template:
+    metadata:
+      labels:
+        app: kafka
+      annotations:
+        linkerd.io/inject: enabled
+    spec:
+      containers:
+      - image: carlostex/grpc-client-kafka
+        name: grpc-client-kafka
+        ports:
+          - containerPort: 29092
+          - containerPort: 9003
+        resources: {}
+      - image: carlostex/kafka-client
+        name: kafka-client
+        ports:
+          - containerPort: 29092
+          - containerPort: 9003
+        resources: {}
+      - image: carlostex/kafka-worker
+        name: kafka-worker
+        resources: {}
+        ports:
+          - containerPort: 29092
+status: {}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    app: kafka
+  name: kafka
+  namespace: squidgame
+spec:
+  ports:
+  - port: 3000
+    name: grpc31
+    protocol: TCP
+    targetPort: 3003
+  - port: 9003
+    name: grpc32
+    protocol: TCP
+    targetPort: 9003
+  - port: 29092
+    name: x1
+    protocol: TCP
+    targetPort: 29092
+  selector:
+    app: kafka
+  type: ClusterIP
+status:
+  loadBalancer: {}
+--- #networking
+apiVersion: networking.k8s.io/v1 
+kind: Ingress 
+metadata: 
+  name: minimal-ingress 
+  annotations: 
+    kubernetes.io/ingress.class: nginx 
+    nginx.ingress.kubernetes.io/rewrite-target: / 
+    nginx.ingress.kubernetes.io/service-upstream: "true"
+  namespace: squidgame
+spec: 
+  rules: 
+  - host: 34.70.68.48.nip.io
+    http: 
+      paths: 
+      - path: /
+        pathType: Prefix 
+        backend: 
+           service: 
+            name: kafka
+            port: 
+              number: 3000
+---
+apiVersion: split.smi-spec.io/v1alpha1
+kind: TrafficSplit
+metadata:
+  name: splitter
+  namespace: squidgame
+spec:
+  service: kafka
+  backends:
+  - service: kafka
+    weight: 100

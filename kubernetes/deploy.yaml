@@ -1,0 +1,33 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: rabbitmq
+  name: rabbitmq
+  namespace: squidgame
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: rabbitmq
+  strategy: {}
+  template:
+    metadata:
+      labels:
+        app: rabbitmq
+      annotations:
+        linkerd.io/inject: enabled
+    spec:
+      containers:
+      - image: carlostex/grpc-client-rabbit
+        name: grpc-client-rabbit
+        ports:
+          - containerPort: 3001
+          - containerPort: 9001
+        resources: {}
+      - image: carlostex/rabbitmq-client
+        name: rabbitmq-client
+        ports:
+          - containerPort: 9001
+        resources: {}
+status: {}

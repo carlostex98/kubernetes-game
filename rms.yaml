@@ -1,10 +1,4 @@
-apiVersion: v1
-kind: Namespace
-metadata:
-  name: squidgame
-spec : {}
-status: {}
---- #primer cliente
+
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -134,82 +128,30 @@ spec:
         name: pubsub-client
         resources: {}
 status: {}
---- #tercer wwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwww
-apiVersion: apps/v1
-kind: Deployment
-metadata:
-  labels:
-    app: rabbitmq-worker
-  name: rabbitmq-worker
-  namespace: squidgame
-spec:
-  replicas: 1
-  selector:
-    matchLabels:
-      app: rabbitmq-worker
-  strategy: {}
-  template:
-    metadata:
-      labels:
-        app: rabbitmq-client
-      annotations:
-        linkerd.io/inject: enabled
-    spec:
-      containers:
-      - image: carlostex/rabbitmq-worker
-        name: rabbitmq-client
-        resources: {}
-status: {}
---- #segundo cliente intermedio
-apiVersion: apps/v1
-kind: Deployment
-metadata:
-  labels:
-    app: pubsub-worker
-  name: pubsub-worker
-  namespace: squidgame
-spec:
-  replicas: 1
-  selector:
-    matchLabels:
-      app: pubsub-worker
-  strategy: {}
-  template:
-    metadata:
-      labels:
-        app: pubsub-worker
-      annotations:
-        linkerd.io/inject: enabled
-    spec:
-      containers:
-      - image: carlostex/pubsub-worker
-        name: pubsub-worker
-        resources: {}
-status: {}
 --- #tercer cliente intermedio
 apiVersion: apps/v1
 kind: Deployment
 metadata:
   labels:
-    app: kafka-worker
-  name: kafka-worker
+    app: kafka-client
+  name: kafka-client
   namespace: squidgame
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: kafka-worker
+      app: kafka-client
   strategy: {}
   template:
     metadata:
       labels:
-        app: kafka-worker
+        app: kafka-client
       annotations:
         linkerd.io/inject: enabled
     spec:
       containers:
-      - image: carlostex/kafka-worker
-        name: kafka-worker
+      - image: carlostex/kafka-client
+        name: kafka-client
         resources: {}
 status: {}
 --- #servicios
@@ -305,8 +247,8 @@ apiVersion: v1
 kind: Service
 metadata:
   labels:
-    app: pubsub-client
-  name: pubsub-client
+    app: grpc-client-pubsub
+  name: grpc-client-pubsub
   namespace: squidgame
 spec:
   ports:
@@ -319,7 +261,7 @@ spec:
     protocol: TCP
     targetPort: 9002
   selector:
-    app: pubsub-client
+    app: grpc-client-pubsub
   type: ClusterIP
 status:
   loadBalancer: {}
@@ -328,8 +270,8 @@ apiVersion: v1
 kind: Service
 metadata:
   labels:
-    app: kafka-client
-  name: kafka-client
+    app: grpc-client-kafka
+  name: grpc-client-kafka
   namespace: squidgame
 spec:
   ports:
@@ -342,72 +284,7 @@ spec:
     protocol: TCP
     targetPort: 9003
   selector:
-    app: kafka-client
-  type: ClusterIP
-status:
-  loadBalancer: {}
---- #servicios finales
-apiVersion: v1
-kind: Service
-metadata:
-  labels:
-    app: rabbitmq-worker
-  name: rabbitmq-worker
-  namespace: squidgame
-spec:
-  ports:
-  - port: 9001
-    name: rpc12ix
-    protocol: TCP
-    targetPort: 9001
-  selector:
-    app: rabbitmq-worker
-  type: ClusterIP
-status:
-  loadBalancer: {}
----
-apiVersion: v1
-kind: Service
-metadata:
-  labels:
-    app: pubsub-worker
-  name: pubsub-worker
-  namespace: squidgame
-spec:
-  ports:
-  - port: 3000
-    name: grpc21s
-    protocol: TCP
-    targetPort: 3002
-  - port: 9002
-    name: grpc22s
-    protocol: TCP
-    targetPort: 9002
-  selector:
-    app: pubsub-worker
-  type: ClusterIP
-status:
-  loadBalancer: {}
----
-apiVersion: v1
-kind: Service
-metadata:
-  labels:
-    app: kafka-worker
-  name: kafka-worker
-  namespace: squidgame
-spec:
-  ports:
-  - port: 3000
-    name: grpc31z
-    protocol: TCP
-    targetPort: 3003
-  - port: 9003
-    name: grpc32z
-    protocol: TCP
-    targetPort: 9003
-  selector:
-    app: kafka-worker
+    app: grpc-client-kafka
   type: ClusterIP
 status:
   loadBalancer: {}

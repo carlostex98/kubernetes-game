@@ -1,10 +1,3 @@
-apiVersion: v1
-kind: Namespace
-metadata:
-  name: squidgame
-spec : {}
-status: {}
---- #primer cliente
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -28,6 +21,9 @@ spec:
       containers:
       - image: carlostex/grpc-client-rabbit
         name: grpc-client-rabbit
+        resources: {}
+      - image: carlostex/rabbitmq-client
+        name: rabbitmq-client
         resources: {}
 status: {}
 --- #segundo cliente
@@ -55,6 +51,9 @@ spec:
       - image: carlostex/grpc-client-pubsub
         name: grpc-client-pubsub
         resources: {}
+      - image: carlostex/pubsub-client
+        name: pubsub-client
+        resources: {}
 status: {}
 --- #tercer cliente (1)
 apiVersion: apps/v1
@@ -81,60 +80,11 @@ spec:
       - image: carlostex/grpc-client-kafka
         name: grpc-client-kafka
         resources: {}
-status: {}
---- #primer cliente intermedio
-apiVersion: apps/v1
-kind: Deployment
-metadata:
-  labels:
-    app: rabbitmq-client
-  name: rabbitmq-client
-  namespace: squidgame
-spec:
-  replicas: 1
-  selector:
-    matchLabels:
-      app: rabbitmq-client
-  strategy: {}
-  template:
-    metadata:
-      labels:
-        app: rabbitmq-client
-      annotations:
-        linkerd.io/inject: enabled
-    spec:
-      containers:
-      - image: carlostex/rabbitmq-client
-        name: rabbitmq-client
+      - image: carlostex/grpc-client-kafka
+        name: kafka-client
         resources: {}
 status: {}
---- #segundo cliente intermedio
-apiVersion: apps/v1
-kind: Deployment
-metadata:
-  labels:
-    app: pubsub-client
-  name: pubsub-client
-  namespace: squidgame
-spec:
-  replicas: 1
-  selector:
-    matchLabels:
-      app: pubsub-client
-  strategy: {}
-  template:
-    metadata:
-      labels:
-        app: pubsub-client
-      annotations:
-        linkerd.io/inject: enabled
-    spec:
-      containers:
-      - image: carlostex/pubsub-client
-        name: pubsub-client
-        resources: {}
-status: {}
---- #tercer wwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwww
+--- #workers
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -151,16 +101,16 @@ spec:
   template:
     metadata:
       labels:
-        app: rabbitmq-client
+        app: rabbitmq-worker
       annotations:
         linkerd.io/inject: enabled
     spec:
       containers:
       - image: carlostex/rabbitmq-worker
-        name: rabbitmq-client
+        name: rabbitmq-worker
         resources: {}
 status: {}
---- #segundo cliente intermedio
+--- #segundo workers
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -186,7 +136,7 @@ spec:
         name: pubsub-worker
         resources: {}
 status: {}
---- #tercer cliente intermedio
+--- #tercer workers
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -281,72 +231,7 @@ spec:
   type: ClusterIP
 status:
   loadBalancer: {}
---- #servicios intermedios
-apiVersion: v1
-kind: Service
-metadata:
-  labels:
-    app: rabbitmq-client
-  name: rabbitmq-client
-  namespace: squidgame
-spec:
-  ports:
-  - port: 9001
-    name: rpc12i
-    protocol: TCP
-    targetPort: 9001
-  selector:
-    app: rabbitmq-client
-  type: ClusterIP
-status:
-  loadBalancer: {}
----
-apiVersion: v1
-kind: Service
-metadata:
-  labels:
-    app: pubsub-client
-  name: pubsub-client
-  namespace: squidgame
-spec:
-  ports:
-  - port: 3000
-    name: grpc21
-    protocol: TCP
-    targetPort: 3002
-  - port: 9002
-    name: grpc22
-    protocol: TCP
-    targetPort: 9002
-  selector:
-    app: pubsub-client
-  type: ClusterIP
-status:
-  loadBalancer: {}
----
-apiVersion: v1
-kind: Service
-metadata:
-  labels:
-    app: kafka-client
-  name: kafka-client
-  namespace: squidgame
-spec:
-  ports:
-  - port: 3000
-    name: grpc31
-    protocol: TCP
-    targetPort: 3003
-  - port: 9003
-    name: grpc32
-    protocol: TCP
-    targetPort: 9003
-  selector:
-    app: kafka-client
-  type: ClusterIP
-status:
-  loadBalancer: {}
---- #servicios finales
+--- #servicios worker
 apiVersion: v1
 kind: Service
 metadata:
@@ -355,13 +240,17 @@ metadata:
   name: rabbitmq-worker
   namespace: squidgame
 spec:
-  ports:
-  - port: 9001
-    name: rpc12ix
-    protocol: TCP
-    targetPort: 9001
   selector:
     app: rabbitmq-worker
+  ports:
+  - port: 5672
+    name: a1
+    protocol: TCP
+    targetPort: 5672
+  - port: 27017
+    name: a2
+    protocol: TCP
+    targetPort: 27017
   type: ClusterIP
 status:
   loadBalancer: {}
@@ -374,17 +263,17 @@ metadata:
   name: pubsub-worker
   namespace: squidgame
 spec:
-  ports:
-  - port: 3000
-    name: grpc21s
-    protocol: TCP
-    targetPort: 3002
-  - port: 9002
-    name: grpc22s
-    protocol: TCP
-    targetPort: 9002
   selector:
     app: pubsub-worker
+  ports:
+  - port: 80
+    name: b1
+    protocol: TCP
+    targetPort: 80
+  - port: 27017
+    name: b2
+    protocol: TCP
+    targetPort: 27017
   type: ClusterIP
 status:
   loadBalancer: {}
@@ -397,54 +286,17 @@ metadata:
   name: kafka-worker
   namespace: squidgame
 spec:
-  ports:
-  - port: 3000
-    name: grpc31z
-    protocol: TCP
-    targetPort: 3003
-  - port: 9003
-    name: grpc32z
-    protocol: TCP
-    targetPort: 9003
   selector:
     app: kafka-worker
+  ports:
+  - port: 29092
+    name: c1
+    protocol: TCP
+    targetPort: 29092
+  - port: 27017
+    name: c2
+    protocol: TCP
+    targetPort: 27017
   type: ClusterIP
 status:
   loadBalancer: {}
---- #networking
-apiVersion: networking.k8s.io/v1 
-kind: Ingress 
-metadata: 
-  name: minimal-ingress 
-  annotations: 
-    kubernetes.io/ingress.class: nginx 
-    nginx.ingress.kubernetes.io/rewrite-target: / 
-    nginx.ingress.kubernetes.io/service-upstream: "true"
-  namespace: squidgame
-spec: 
-  rules: 
-  - host: 34.70.68.48.nip.io
-    http: 
-      paths: 
-      - path: /
-        pathType: Prefix 
-        backend: 
-           service: 
-            name: grpc-client-rabbit
-            port: 
-              number: 3000
----
-apiVersion: split.smi-spec.io/v1alpha1
-kind: TrafficSplit
-metadata:
-  name: splitter
-  namespace: squidgame
-spec:
-  service: minimal-ingress 
-  backends:
-  - service: grpc-client-rabbit
-    weight: 33
-  - service: grpc-client-pubsub
-    weight: 33
-  - service: grpc-client-kafka
-    weight: 34

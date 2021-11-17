@@ -28,6 +28,15 @@ spec:
       containers:
       - image: carlostex/grpc-client-rabbit
         name: grpc-client-rabbit
+        ports:
+          - containerPort: 3001
+          - containerPort: 9001
+        resources: {}
+      - image: carlostex/rabbitmq-client
+        name: rabbitmq-client
+        ports:
+          - containerPort: 9001
+          - containerPort: 5672
         resources: {}
 status: {}
 --- #segundo cliente
@@ -55,6 +64,15 @@ spec:
       - image: carlostex/grpc-client-pubsub
         name: grpc-client-pubsub
         resources: {}
+        ports:
+          - containerPort: 8080
+          - containerPort: 9002
+      - image: carlostex/pubsub-client
+        name: pubsub-client
+        resources: {}
+        ports:
+          - containerPort: 8080
+          - containerPort: 9002
 status: {}
 --- #tercer cliente (1)
 apiVersion: apps/v1
@@ -80,61 +98,18 @@ spec:
       containers:
       - image: carlostex/grpc-client-kafka
         name: grpc-client-kafka
+        ports:
+          - containerPort: 29092
+          - containerPort: 9003
+        resources: {}
+      - image: carlostex/kafka-client
+        name: kafka-client
+        ports:
+          - containerPort: 29092
+          - containerPort: 9003
         resources: {}
 status: {}
---- #primer cliente intermedio
-apiVersion: apps/v1
-kind: Deployment
-metadata:
-  labels:
-    app: rabbitmq-client
-  name: rabbitmq-client
-  namespace: squidgame
-spec:
-  replicas: 1
-  selector:
-    matchLabels:
-      app: rabbitmq-client
-  strategy: {}
-  template:
-    metadata:
-      labels:
-        app: rabbitmq-client
-      annotations:
-        linkerd.io/inject: enabled
-    spec:
-      containers:
-      - image: carlostex/rabbitmq-client
-        name: rabbitmq-client
-        resources: {}
-status: {}
---- #segundo cliente intermedio
-apiVersion: apps/v1
-kind: Deployment
-metadata:
-  labels:
-    app: pubsub-client
-  name: pubsub-client
-  namespace: squidgame
-spec:
-  replicas: 1
-  selector:
-    matchLabels:
-      app: pubsub-client
-  strategy: {}
-  template:
-    metadata:
-      labels:
-        app: pubsub-client
-      annotations:
-        linkerd.io/inject: enabled
-    spec:
-      containers:
-      - image: carlostex/pubsub-client
-        name: pubsub-client
-        resources: {}
-status: {}
---- #tercer wwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwww
+--- #workers
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -151,16 +126,19 @@ spec:
   template:
     metadata:
       labels:
-        app: rabbitmq-client
+        app: rabbitmq-worker
       annotations:
         linkerd.io/inject: enabled
     spec:
       containers:
       - image: carlostex/rabbitmq-worker
-        name: rabbitmq-client
+        name: rabbitmq-worker
         resources: {}
+        ports:
+          - containerPort: 5672
+          - containerPort: 27017
 status: {}
---- #segundo cliente intermedio
+--- #segundo workers
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -185,8 +163,11 @@ spec:
       - image: carlostex/pubsub-worker
         name: pubsub-worker
         resources: {}
+        ports:
+          - containerPort: 8080
+          - containerPort: 27017
 status: {}
---- #tercer cliente intermedio
+--- #tercer workers
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -211,6 +192,8 @@ spec:
       - image: carlostex/kafka-worker
         name: kafka-worker
         resources: {}
+        ports:
+          - containerPort: 8094
 status: {}
 --- #servicios
 apiVersion: v1
@@ -230,6 +213,10 @@ spec:
     name: grpc12
     protocol: TCP
     targetPort: 9001
+  - port: 30000
+    name: x3
+    protocol: TCP
+    targetPort: 3000
   selector:
     app: grpc-client-rabbit
   type: ClusterIP
@@ -253,6 +240,10 @@ spec:
     name: grpc22
     protocol: TCP
     targetPort: 9002
+  - port: 30001
+    name: x2
+    protocol: TCP
+    targetPort: 30001
   selector:
     app: grpc-client-pubsub
   type: ClusterIP
@@ -276,77 +267,16 @@ spec:
     name: grpc32
     protocol: TCP
     targetPort: 9003
+  - port: 30002
+    name: x1
+    protocol: TCP
+    targetPort: 3002
   selector:
     app: grpc-client-kafka
   type: ClusterIP
 status:
   loadBalancer: {}
---- #servicios intermedios
-apiVersion: v1
-kind: Service
-metadata:
-  labels:
-    app: rabbitmq-client
-  name: rabbitmq-client
-  namespace: squidgame
-spec:
-  ports:
-  - port: 9001
-    name: rpc12i
-    protocol: TCP
-    targetPort: 9001
-  selector:
-    app: rabbitmq-client
-  type: ClusterIP
-status:
-  loadBalancer: {}
----
-apiVersion: v1
-kind: Service
-metadata:
-  labels:
-    app: pubsub-client
-  name: pubsub-client
-  namespace: squidgame
-spec:
-  ports:
-  - port: 3000
-    name: grpc21
-    protocol: TCP
-    targetPort: 3002
-  - port: 9002
-    name: grpc22
-    protocol: TCP
-    targetPort: 9002
-  selector:
-    app: pubsub-client
-  type: ClusterIP
-status:
-  loadBalancer: {}
----
-apiVersion: v1
-kind: Service
-metadata:
-  labels:
-    app: kafka-client
-  name: kafka-client
-  namespace: squidgame
-spec:
-  ports:
-  - port: 3000
-    name: grpc31
-    protocol: TCP
-    targetPort: 3003
-  - port: 9003
-    name: grpc32
-    protocol: TCP
-    targetPort: 9003
-  selector:
-    app: kafka-client
-  type: ClusterIP
-status:
-  loadBalancer: {}
---- #servicios finales
+--- #servicios worker
 apiVersion: v1
 kind: Service
 metadata:
@@ -355,13 +285,13 @@ metadata:
   name: rabbitmq-worker
   namespace: squidgame
 spec:
-  ports:
-  - port: 9001
-    name: rpc12ix
-    protocol: TCP
-    targetPort: 9001
   selector:
     app: rabbitmq-worker
+  ports:
+  - port: 32000
+    name: a1
+    protocol: TCP
+    targetPort: 32000
   type: ClusterIP
 status:
   loadBalancer: {}
@@ -374,17 +304,13 @@ metadata:
   name: pubsub-worker
   namespace: squidgame
 spec:
-  ports:
-  - port: 3000
-    name: grpc21s
-    protocol: TCP
-    targetPort: 3002
-  - port: 9002
-    name: grpc22s
-    protocol: TCP
-    targetPort: 9002
   selector:
     app: pubsub-worker
+  ports:
+  - port: 32001
+    name: b1
+    protocol: TCP
+    targetPort: 32001
   type: ClusterIP
 status:
   loadBalancer: {}
@@ -397,17 +323,13 @@ metadata:
   name: kafka-worker
   namespace: squidgame
 spec:
-  ports:
-  - port: 3000
-    name: grpc31z
-    protocol: TCP
-    targetPort: 3003
-  - port: 9003
-    name: grpc32z
-    protocol: TCP
-    targetPort: 9003
   selector:
     app: kafka-worker
+  ports:
+  - port: 8094
+    name: c1
+    protocol: TCP
+    targetPort: 8094
   type: ClusterIP
 status:
   loadBalancer: {}
@@ -433,6 +355,13 @@ spec:
             name: grpc-client-rabbit
             port: 
               number: 3000
+      - path: /om1
+        pathType: Prefix 
+        backend: 
+           service: 
+            name: kafka-worker
+            port: 
+              number: 8094
 ---
 apiVersion: split.smi-spec.io/v1alpha1
 kind: TrafficSplit
@@ -440,7 +369,7 @@ metadata:
   name: splitter
   namespace: squidgame
 spec:
-  service: minimal-ingress 
+  service: grpc-client-kafka 
   backends:
   - service: grpc-client-rabbit
     weight: 33
@@ -448,3 +377,6 @@ spec:
     weight: 33
   - service: grpc-client-kafka
     weight: 34
+--- #servicios port 1
+
+
