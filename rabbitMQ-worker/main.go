@@ -85,7 +85,7 @@ func main() {
 			xx := convertToMongo(sx[0], sx[1], sx[2], sx[3], sx[4])
 			go newDataMongo(xx, *client)
 
-			response := "1"
+			response := true
 
 			err = ch.Publish(
 				"",        // exchange
