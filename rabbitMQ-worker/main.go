@@ -83,9 +83,9 @@ func main() {
 			al := string(d.Body)
 			sx := strings.Split(al, "|")//valores spliteados
 			xx := convertToMongo(sx[0], sx[1], sx[2], sx[3], sx[4])
-			response := newDataMongo(xx, *client)
+			go newDataMongo(xx, *client)
 
-			//response := "1"
+			response := "1"
 
 			err = ch.Publish(
 				"",        // exchange

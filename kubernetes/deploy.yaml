@@ -23,11 +23,38 @@ spec:
         name: grpc-client-rabbit
         ports:
           - containerPort: 3001
-          - containerPort: 9001
         resources: {}
       - image: carlostex/rabbitmq-client
         name: rabbitmq-client
         ports:
           - containerPort: 9001
         resources: {}
+      - image: carlostex/rabbitmq-worker:latest
+        name: rabbitmq-worker
+        resources: {}
+      - image: rabbitmq:3-management-alpine
+        name: rabbitmqs
+        ports:
+            - containerPort: 5672
+            - containerPort: 15672
+        resources: {}
 status: {}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    app: rabbitmq-service
+  name: rabbitmq-service
+  namespace: squidgame
+spec:
+  ports:
+  - port: 3000
+    name: rb1
+    protocol: TCP
+    targetPort: 3001
+  selector:
+    app: rabbitmq
+  type: ClusterIP
+status:
+  loadBalancer: {}
