@@ -19,7 +19,7 @@ func failOnError(err error, msg string) {
 }
 
 const (
-	URI = "mongodb://root:example@34.66.118.26:27017/"
+	URI = "mongodb://root:example@35.184.26.14:27017/"
 )
 
 type Data struct {

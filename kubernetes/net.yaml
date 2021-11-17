@@ -30,3 +30,11 @@ spec:
   backends:
   - service: rabbitmq-service
     weight: 100
+#---
+#kind: Endpoints
+#apiVersion: v1 
+#metadata:
+#  name: back-rabbit
+#subsets:
+#  - addresses:
+#    - ip: 35.184.26.14
