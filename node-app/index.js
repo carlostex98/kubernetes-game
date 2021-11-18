@@ -61,8 +61,9 @@ async function allData() {
 }
 
 async function top3() {
+    
     const c = await collection.aggregate([{ $group: { _id: "$game", count: { $sum: 1 } } }])
-    return c.toArray();
+    return c;
 }
 
 async function workerReport() {
@@ -83,6 +84,6 @@ async function getLast10(){
 }
 
 async function best10(){
-    const c = await collection.aggregate([{ $group: { _id: "$winner", count: { $sum: 1 } } }]).sort({_id:1}).limit(10);
+    const c = await collection.aggregate([{ $group: { _id: "$winner", count: { $sum: -1 } } }]).sort({count:1}).limit(10);
     return c.toArray();
 }
