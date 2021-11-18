@@ -6,10 +6,9 @@ metadata:
 spec:
   action: pod-failure
   mode: one
-  value: ''
-  duration: '30s'
+  duration: "30s"
   selector:
+    namespaces:
+      - squidgame
     labelSelectors:
-      'app.kubernetes.io/component': 'rabbitmq'
-  scheduler:
-    cron: '@every 2m'
+      app: kafka

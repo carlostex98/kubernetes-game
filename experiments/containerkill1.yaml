@@ -6,9 +6,11 @@ metadata:
 spec:
   action: container-kill
   mode: one
-  containerName: 'kafka-worker'
   selector:
+    namespaces:
+      - squidgame
     labelSelectors:
-      'app.kubernetes.io/component': 'monitor'
-  scheduler:
-    cron: '@every 30s'
+      #app.kubernetes.io/component: kafka
+      app: kafka
+  containerNames:
+    - "docker://carlostex/kafka-worker"

@@ -1,14 +1,16 @@
 apiVersion: chaos-mesh.org/v1alpha1
 kind: DNSChaos
 metadata:
-  name: busybox-dns-chaos
+  name: dns-chaos-example
+  namespace: chaos-testing
 spec:
   action: random
-  scope: inner
   mode: all
+  patterns:
+    - google.com
+    - chaos-mesh.*
+    - github.com
   selector:
     namespaces:
       - squidgame
-  duration: '90s'
-  scheduler:
-    cron: '@every 100s'
+  duration: "50s"
