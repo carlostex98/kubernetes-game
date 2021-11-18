@@ -112,10 +112,10 @@ export class Dashboard extends Component {
             </div>
           </div>
 
-          <h3 className="title is-3">Top jugadores </h3>
+          <h3 className="title is-3">Top juegos </h3>
           <div class="tags are-medium">
           {this.state.top.map((object, i) => <> 
-            <span class="tag">{object._id + " - "+object.count}</span>
+            <span class="tag">{"Juego: "+object._id + " -  ganados "+object.count}</span>
           </>)}
           </div>
 
