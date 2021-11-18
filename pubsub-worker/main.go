@@ -17,7 +17,7 @@ import (
 )
 
 const (
-	URI = "mongodb://root:example@34.66.118.26:27017/"
+	URI = "mongodb://root:example@35.184.26.14:27017/"
 )
 
 type Data struct {
@@ -38,12 +38,29 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
-	defer client.Close()
+	//	defer client.Close()
 
-	topicName := "sopes-rpc"
-	topic := client.Topic(topicName)
+	topicName := "tema-chilero"
+	client.Topic(topicName)	
 
-	sub, errz := client.CreateSubscription(context.Background(), "sopes-g", pubsub.SubscriptionConfig{Topic: topic})
+	sub := client.Subscription("tema-chilero-sub")
+	err = sub.Receive(ctx, func(ctx context.Context, m *pubsub.Message) {
+		fmt.Println(string(m.Data))
+		al := string(m.Data)
+		sx := strings.Split(al, "|") //valores spliteados
+		xx := convertToMongo(sx[0], sx[1], sx[2], sx[3], sx[4])
+		newDataMongo(xx, *clientM)
+		m.Ack() // Acknowledge that we've consumed the message.
+	})
+	if err != nil {
+		log.Println(err)
+	}
+
+	/*sub, errz := client.CreateSubscription(ctx, "tema-chilero-sub", pubsub.SubscriptionConfig{Topic: topic})
+	if errz != nil {
+		// Handle error.
+		fmt.Println(errz)
+	}
 	errz = sub.Receive(context.Background(), func(ctx context.Context, m *pubsub.Message) {
 		log.Printf("Got message: %s", m.Data)
 		al := string(m.Data)
@@ -51,10 +68,8 @@ func main() {
 		xx := convertToMongo(sx[0], sx[1], sx[2], sx[3], sx[4])
 		newDataMongo(xx, *clientM)
 		m.Ack()
-	})
-	if errz != nil {
-		// Handle error.
-	}
+	})*/
+	
 
 }
 

@@ -64,12 +64,12 @@ spec:
       - image: carlostex/grpc-client-kafka
         name: grpc-client-kafka
         ports:
-          - containerPort: 3002
+          - containerPort: 3003
         resources: {}
       - image: carlostex/kafka-client
         name: kafka-client
         ports:
-          - containerPort: 9002
+          - containerPort: 9003
         resources: {}
       - image: carlostex/kafka-worker:latest
         name: kafka-worker
@@ -114,7 +114,7 @@ spec:
   - port: 3000
     name: rb2
     protocol: TCP
-    targetPort: 3002
+    targetPort: 3003
   selector:
     app: kafka
   type: ClusterIP

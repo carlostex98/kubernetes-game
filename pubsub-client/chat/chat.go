@@ -34,7 +34,7 @@ func (s *Server) SayHello(ctx context.Context, message *Message) (*Message, erro
 		log.Fatal(err)
 	}
 	defer client.Close()
-	topicName := "sopes-rpc"
+	topicName := "tema-chilero"
 	topic = client.Topic(topicName)
 
 	msg := &pubsub.Message{

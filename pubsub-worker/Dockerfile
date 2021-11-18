@@ -5,7 +5,7 @@ WORKDIR /app
 COPY go.mod .
 COPY go.sum .
 RUN go mod download
-RUN export GOOGLE_APPLICATION_CREDENTIALS=credentials2.json
+ENV GOOGLE_APPLICATION_CREDENTIALS=credentials2.json
 
 COPY . .
 
