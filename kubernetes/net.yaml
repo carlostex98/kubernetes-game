@@ -9,7 +9,7 @@ metadata:
   namespace: squidgame
 spec: 
   rules: 
-  - host: 34.192.200.215.nip.io
+  - host: 35.192.200.215.nip.io
     http: 
       paths: 
       - path: /

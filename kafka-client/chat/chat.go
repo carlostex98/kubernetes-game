@@ -23,10 +23,11 @@ func (s *Server) SayHello(ctx context.Context, message *Message) (*Message, erro
 	x := setWiner(sx[0], sx[1], sx[2], sx[3]) //esto se envia al worker de rabbit mq
 
 	//kafka aqui
-	PushCommentToQueue(
+	err := PushCommentToQueue(
 		"kafka-sopes",
 		[]byte(x),
 	)
+	fmt.Println(err)
 
 
 	return &Message{Body: "s"}, nil

@@ -75,7 +75,7 @@ spec:
         name: kafka-worker
         resources: {}
       - image: bashj79/kafka-kraft
-        name: kafka-client
+        name: kafkabr
         ports:
           - containerPort: 9092
         resources: {}
