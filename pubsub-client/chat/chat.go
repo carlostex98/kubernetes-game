@@ -33,7 +33,7 @@ func (s *Server) SayHello(ctx context.Context, message *Message) (*Message, erro
 	if err != nil {
 		log.Fatal(err)
 	}
-	defer client.Close()
+	//defer client.Close()
 	topicName := "tema-chilero"
 	topic = client.Topic(topicName)
 

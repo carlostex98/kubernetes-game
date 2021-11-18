@@ -79,8 +79,42 @@ spec:
         ports:
           - containerPort: 9092
         resources: {}
-      
-      
+status: {}
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: pubsub
+  name: pubsub
+  namespace: squidgame
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: pubsub
+  strategy: {}
+  template:
+    metadata:
+      labels:
+        app: pubsub
+      annotations:
+        linkerd.io/inject: enabled
+    spec:
+      containers:
+      - image: carlostex/grpc-client-pubsub
+        name: grpc-client-pubsub
+        ports:
+          - containerPort: 3002
+        resources: {}
+      - image: carlostex/pubsub-client
+        name: pubsub-client
+        ports:
+          - containerPort: 9002
+        resources: {}
+      - image: carlostex/pubsub-worker:latest
+        name: pubsub-worker
+        resources: {}
 status: {}
 ---
 apiVersion: v1
@@ -117,6 +151,25 @@ spec:
     targetPort: 3003
   selector:
     app: kafka
+  type: ClusterIP
+status:
+  loadBalancer: {}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    app: pubsub-service
+  name: pubsub-service
+  namespace: squidgame
+spec:
+  ports:
+  - port: 3000
+    name: rb3
+    protocol: TCP
+    targetPort: 3002
+  selector:
+    app: pubsub
   type: ClusterIP
 status:
   loadBalancer: {}
