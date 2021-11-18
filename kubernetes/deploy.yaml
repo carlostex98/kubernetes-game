@@ -117,6 +117,34 @@ spec:
         resources: {}
 status: {}
 ---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: node
+  name: node
+  namespace: squidgame
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: node
+  strategy: {}
+  template:
+    metadata:
+      labels:
+        app: node
+      annotations:
+        linkerd.io/inject: enabled
+    spec:
+      containers:
+      - image: carlostex/node-dashboard
+        name: node-dashboard
+        ports:
+          - containerPort: 2500
+        resources: {}
+status: {}
+---
 apiVersion: v1
 kind: Service
 metadata:
@@ -170,6 +198,25 @@ spec:
     targetPort: 3002
   selector:
     app: pubsub
+  type: ClusterIP
+status:
+  loadBalancer: {}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    app: node-service
+  name: node-service
+  namespace: squidgame
+spec:
+  ports:
+  - port: 2500
+    name: rb4
+    protocol: TCP
+    targetPort: 2500
+  selector:
+    app: node
   type: ClusterIP
 status:
   loadBalancer: {}
