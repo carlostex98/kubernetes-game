@@ -55,6 +55,11 @@ sudo docker build -t  carlostex/node-dashboard .
 sudo docker push carlostex/node-dashboard 
 cd ..
 
+cd adminpanel
+sudo docker build -t  carlostex/adminpanel .
+sudo docker push carlostex/adminpanel
+cd ..
+
 
 
 
