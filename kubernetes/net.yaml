@@ -9,7 +9,7 @@ metadata:
   namespace: squidgame
 spec: 
   rules: 
-  - host: 34.132.170.147.nip.io
+  - host: 34.192.200.215.nip.io
     http: 
       paths: 
       - path: /
@@ -29,7 +29,9 @@ spec:
   service: rabbitmq-service
   backends:
   - service: rabbitmq-service
-    weight: 100
+    weight: 50
+  - service: kafka-service
+    weight: 50
 #---
 #kind: Endpoints
 #apiVersion: v1 

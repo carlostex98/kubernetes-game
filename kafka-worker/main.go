@@ -24,7 +24,7 @@ type Data struct {
 }
 
 const (
-	URI = "mongodb://root:example@34.66.118.26:27017/"
+	URI = "mongodb://root:example@35.184.26.14:27017/"
 )
 
 func main() {
@@ -32,7 +32,7 @@ func main() {
 	client, _ := mongo.Connect(context.TODO(), options.Client().ApplyURI(URI))
 
 	topic := "kafka-sopes"
-	worker, err := connectConsumer([]string{"34.66.118.26:29092"})
+	worker, err := connectConsumer([]string{"localhost:29092"})
 	if err != nil {
 		panic(err)
 	}
