@@ -145,6 +145,34 @@ spec:
         resources: {}
 status: {}
 ---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: react
+  name: react
+  namespace: squidgame
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: react
+  strategy: {}
+  template:
+    metadata:
+      labels:
+        app: react
+      annotations:
+        linkerd.io/inject: enabled
+    spec:
+      containers:
+      - image: carlostex/adminpanel
+        name: adminpanel
+        ports:
+          - containerPort: 3000
+        resources: {}
+status: {}
+---
 apiVersion: v1
 kind: Service
 metadata:
@@ -217,6 +245,25 @@ spec:
     targetPort: 2500
   selector:
     app: node
+  type: ClusterIP
+status:
+  loadBalancer: {}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    app: react-service
+  name: react-service
+  namespace: squidgame
+spec:
+  ports:
+  - port: 3000
+    name: rb5
+    protocol: TCP
+    targetPort: 3000
+  selector:
+    app: react
   type: ClusterIP
 status:
   loadBalancer: {}

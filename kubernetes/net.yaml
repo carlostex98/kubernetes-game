@@ -14,7 +14,7 @@ spec:
   - host: 35.192.200.215.nip.io
     http: 
       paths: 
-      - path: /(.*)
+      - path: /app/(.*)
         pathType: Prefix 
         backend: 
            service: 
@@ -28,6 +28,13 @@ spec:
             name: node-service
             port: 
               number: 2500
+      - path: /(.*)
+        pathType: Prefix 
+        backend: 
+           service: 
+            name: react-service
+            port: 
+              number: 3000
 ---
 apiVersion: split.smi-spec.io/v1alpha1
 kind: TrafficSplit
