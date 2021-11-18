@@ -49,6 +49,13 @@ sudo docker build -t  carlostex/pubsub-worker .
 sudo docker push carlostex/pubsub-worker
 cd ..
 
+# imagenes de los reportes
+cd node-app
+sudo docker build -t  carlostex/node-dashboard .
+sudo docker push carlostex/node-dashboard 
+cd ..
+
+
 
 
 
