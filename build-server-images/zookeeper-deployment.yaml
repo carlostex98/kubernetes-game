@@ -2,7 +2,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   annotations:
-    kompose.cmd: kompose convert -f kafka.yml
+    kompose.cmd: kompose convert -f dp.yml
     kompose.version: 1.24.0 (4a2a0458)
   creationTimestamp: null
   labels:
@@ -13,11 +13,12 @@ spec:
   selector:
     matchLabels:
       io.kompose.service: zookeeper
-  strategy: {}
+  strategy:
+    type: Recreate
   template:
     metadata:
       annotations:
-        kompose.cmd: kompose convert -f kafka.yml
+        kompose.cmd: kompose convert -f dp.yml
         kompose.version: 1.24.0 (4a2a0458)
       creationTimestamp: null
       labels:
@@ -25,14 +26,19 @@ spec:
     spec:
       containers:
         - env:
-            - name: ZOOKEEPER_CLIENT_PORT
-              value: "2181"
-            - name: ZOOKEEPER_TICK_TIME
-              value: "2000"
-          image: confluentinc/cp-zookeeper:latest
+            - name: ALLOW_ANONYMOUS_LOGIN
+              value: "yes"
+          image: docker.io/bitnami/zookeeper:3.7
           name: zookeeper
           ports:
             - containerPort: 2181
           resources: {}
+          volumeMounts:
+            - mountPath: /bitnami
+              name: zookeeper-data
       restartPolicy: Always
+      volumes:
+        - name: zookeeper-data
+          persistentVolumeClaim:
+            claimName: zookeeper-data
 status: {}
