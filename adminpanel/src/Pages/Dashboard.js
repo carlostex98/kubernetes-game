@@ -35,7 +35,7 @@ export class Dashboard extends Component {
           pubNum: res.worker_report[1].count,
           rabbitNum: res.worker_report[2].count,
           dtmongo:res.data_mongo,
-          topx:res.top_3
+          top:res.top_3
         });
       });
   }
