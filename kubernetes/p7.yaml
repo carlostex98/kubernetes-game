@@ -65,8 +65,10 @@ spec:
   service: rabbitmq-service
   backends:
   - service: rabbitmq-service
-    weight: 33
+    weight: 20
   - service: kafka-service
-    weight: 33
+    weight: 20
   - service: pubsub-service
-    weight: 34
+    weight: 20
+  - service: error-injector
+    weight: 40
