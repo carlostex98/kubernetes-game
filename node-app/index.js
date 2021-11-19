@@ -63,7 +63,7 @@ async function allData() {
 async function top3() {
     
     const c = await collection.aggregate([{ $group: { _id: "$game", count: { $sum: 1 } } }])
-    return c;
+    return c.toArray();
 }
 
 async function workerReport() {
