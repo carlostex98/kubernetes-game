@@ -10,7 +10,7 @@ This project is not ready for production, for educational purposes only.
 
 
 
-## Features an more
+## Features and more
 
 - Use of high demand queues
 - Docker, Kubernetes and containers ❤️
